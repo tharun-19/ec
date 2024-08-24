@@ -32,7 +32,7 @@ public class User {
 	@ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
 	@Column(name = "role")
-	Set<Role> roles;
+	private Set<Role> roles;
 //	This annotation specifies the table where the collection of roles will be stored and
 //	how it should be joined with the parent table (in this case, the users table).
 

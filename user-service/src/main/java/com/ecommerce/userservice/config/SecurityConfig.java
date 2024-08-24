@@ -1,5 +1,13 @@
+//Using hasRole vs. hasAuthority:
+//hasRole("ADMIN"): When you use hasRole("ADMIN"), Spring Security automatically adds a ROLE_ prefix, 
+//so it looks for ROLE_ADMIN in the authorities list.
+//hasAuthority("ADMIN"): When you use hasAuthority("ADMIN"), Spring Security looks for the exact authority 
+//without adding any prefix.
+
+
 package com.ecommerce.userservice.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +28,7 @@ import com.ecommerce.userservice.filter.JwtRequestFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+	@Autowired
     private final JwtRequestFilter jwtRequestFilter;
 
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
@@ -40,8 +49,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeRequests(requests -> requests
-                        .requestMatchers("/", "/authenticate", "/auth/register").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/", "/user-service/auth/authenticate", "/user-service/auth/register").permitAll()
+                        .requestMatchers("/user-service/admin/**").hasAuthority("ADMIN") 
                         .anyRequest().authenticated())
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -49,4 +58,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
