@@ -85,7 +85,12 @@ public class UserController {
 	public User getCurrentUserDetails() {
 	    return getCurrentUser();
 	}
-
+	@DeleteMapping("/user/delete")
+	public ResponseEntity<String> deleteCurrentUserAccount() {
+	    User currentUser = getCurrentUser(); // Retrieve the currently logged-in user
+	    userRepository.delete(currentUser);  // Delete the user from the database
+	    return ResponseEntity.ok("Account deleted successfully");
+	}
 
 	public User getCurrentUser() {
 	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
