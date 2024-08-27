@@ -8,7 +8,7 @@ public class Price {
 
 	@Id
 	private String id;
-	private String produtId;
+	private String productId;
 	private double basePrice;
 	private double discount;
 	private double finalPrice;
@@ -22,11 +22,11 @@ public class Price {
 	}
 
 	public String getProdutId() {
-		return produtId;
+		return productId;
 	}
 
-	public void setProdutId(String produtId) {
-		this.produtId = produtId;
+	public void setProdutId(String productId) {
+		this.productId = productId;
 	}
 
 	public double getBasePrice() {

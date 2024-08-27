@@ -1,22 +1,22 @@
 package com.ecommerce.productservice.service;
 
-import java.util.Optional;
-
+import com.ecommerce.productservice.exception.PriceNotFoundException;
+import com.ecommerce.productservice.model.Price;
+import com.ecommerce.productservice.repository.PriceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ecommerce.productservice.model.Price;
-import com.ecommerce.productservice.repository.PriceRepository;
+import java.util.Optional;
 
 @Service
 public class PriceService {
-	
-	@Autowired
-	private PriceRepository priceRepository;
-	
-	public Optional<Price> getPriceByProductId(String productId) {
-        return priceRepository.findByProductId(productId);
-        
+
+    @Autowired
+    private PriceRepository priceRepository;
+
+    public Price getPriceByProductId(String productId) {
+        return priceRepository.findByProductId(productId)
+                .orElseThrow(() -> new PriceNotFoundException("Price not found for product id: " + productId));
     }
 
     public Price updatePrice(String productId, double basePrice, double discount) {
@@ -27,7 +27,7 @@ public class PriceService {
                     price.setFinalPrice(basePrice - discount);
                     return priceRepository.save(price);
                 })
-                .orElseThrow(() -> new RuntimeException("Price not found for product id: " + productId));
+                .orElseThrow(() -> new PriceNotFoundException("Price not found for product id: " + productId));
     }
 
     public Price createPrice(Price price) {
@@ -36,6 +36,9 @@ public class PriceService {
     }
 
     public void deletePrice(String id) {
+        if (!priceRepository.existsById(id)) {
+            throw new PriceNotFoundException("Price not found with id: " + id);
+        }
         priceRepository.deleteById(id);
     }
 }

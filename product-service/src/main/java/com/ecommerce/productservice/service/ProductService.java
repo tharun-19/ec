@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.productservice.exception.ProductNotFoundException;
 import com.ecommerce.productservice.model.Product;
 import com.ecommerce.productservice.repository.ProductRepository;
 
@@ -41,11 +42,14 @@ public class ProductService {
 					product.setInventories(productDetails.getInventories());
 					product.setPrice(productDetails.getPrice());
 					return productRepository.save(product);
-				}).orElseThrow(()-> new RuntimeException("Product not found with ID:"+id));
+				}).orElseThrow(()-> new ProductNotFoundException("Product not found with ID:"+id));
 	}
 
-	public void deleteProduct(String id) {
-		productRepository.deleteById(id);
-	}
+    public void deleteProduct(String id) {
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException("Product not found with id: " + id);
+        }
+        productRepository.deleteById(id);
+    }
 	
 }
