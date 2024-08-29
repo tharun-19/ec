@@ -6,31 +6,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
-
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping("/api/inventories")
 public class InventoryController {
 
     @Autowired
     private InventoryService inventoryService;
 
-    @GetMapping("/{productId}")
+    @GetMapping("/product/{productId}")
     public Inventory getInventoryByProductId(@PathVariable String productId) {
         return inventoryService.getInventoryByProductId(productId);
     }
 
-    @PutMapping("/admin/{productId}")
+    @PutMapping("/product/{productId}")
     public Inventory updateInventory(@PathVariable String productId, @RequestParam int quantity) {
         return inventoryService.updateInventory(productId, quantity);
     }
 
-    @PostMapping("/admin")
+    @PostMapping
     public Inventory createInventory(@RequestBody Inventory inventory) {
         return inventoryService.createInventory(inventory);
     }
 
-    @DeleteMapping("/admin/{id}")
+    @DeleteMapping("/{id}")
     public void deleteInventory(@PathVariable String id) {
         inventoryService.deleteInventory(id);
     }
 }
+

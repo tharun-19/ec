@@ -21,11 +21,11 @@ public class Price {
 		this.id = id;
 	}
 
-	public String getProdutId() {
+	public String getProductId() {
 		return productId;
 	}
 
-	public void setProdutId(String productId) {
+	public void setProductId(String productId) {
 		this.productId = productId;
 	}
 

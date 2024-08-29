@@ -52,6 +52,7 @@ public class AuthController {
 	public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest)
 			throws Exception {
 		try {
+//			System.out.println(authenticationRequest);
 			System.out.println(authenticationRequest.getUsername());
 			System.out.println(authenticationRequest.getPassword());
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
