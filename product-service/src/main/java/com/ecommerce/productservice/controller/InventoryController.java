@@ -18,7 +18,7 @@ public class InventoryController {
         return inventoryService.getInventoryByProductId(productId);
     }
 
-    @PutMapping("/product/{productId}")
+    @PutMapping("/product/{productId}") //to update no of products and warehouse location
     public Inventory updateInventory(@PathVariable String productId, @RequestParam int quantity) {
         return inventoryService.updateInventory(productId, quantity);
     }
