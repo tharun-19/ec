@@ -1,11 +1,11 @@
 package com.ecommerce.productservice.service;
 
 import java.util.List;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperationContext;
@@ -15,17 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.ecommerce.productservice.model.Product;
 import com.ecommerce.productservice.repository.ProductRepository;
-
-
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -38,9 +27,6 @@ public class SearchService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
-//	public List<Product> searchProductsByCategory(String categoryName) {
-//		return productRepository.findByCategoryName(categoryName);
-//	}
 	
 	public List<Product> searchProductsByCategory(String categoryName) {
         // Create the Aggregation
