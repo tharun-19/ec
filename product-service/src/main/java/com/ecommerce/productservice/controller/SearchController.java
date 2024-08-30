@@ -14,10 +14,19 @@ public class SearchController {
     @Autowired
     private SearchService searchService;
 
+//    @GetMapping("/category")
+//    public List<Product> searchProductsByCategory(@RequestParam String categoryName) {
+//    	System.out.println(categoryName);
+//        return searchService.searchProductsByCategory(categoryName);
+//    }
+    
     @GetMapping("/category")
     public List<Product> searchProductsByCategory(@RequestParam String categoryName) {
+    	System.out.println(categoryName);
         return searchService.searchProductsByCategory(categoryName);
     }
+    
+    
 
     @GetMapping("/price")
     public List<Product> filterProductsByPriceRange(@RequestParam double minPrice, @RequestParam double maxPrice) {

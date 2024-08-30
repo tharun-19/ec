@@ -22,7 +22,7 @@ public class PriceController {
     public Price updatePrice(@PathVariable String productId, @RequestParam double basePrice, @RequestParam double discount) {
         return priceService.updatePrice(productId, basePrice, discount);
     }
-
+//================================OPTIONAL=============================
     @PostMapping
     public Price createPrice(@RequestBody Price price) {
         return priceService.createPrice(price);
