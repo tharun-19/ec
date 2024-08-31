@@ -1,186 +1,99 @@
 package com.ecommerce.productservice.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.productservice.exception.ProductNotFoundException;
-import com.ecommerce.productservice.model.Category;
-import com.ecommerce.productservice.model.Inventory;
-import com.ecommerce.productservice.model.Price;
 import com.ecommerce.productservice.model.Product;
-import com.ecommerce.productservice.repository.CategoryRepository;
-import com.ecommerce.productservice.repository.InventoryRepository;
-import com.ecommerce.productservice.repository.PriceRepository;
 import com.ecommerce.productservice.repository.ProductRepository;
 
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
-    
-    @Autowired
-    private CategoryRepository categoryRepository;
+	@Autowired
+	private ProductRepository productRepository;
 
-    @Autowired
-    private InventoryRepository inventoryRepository;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private PriceRepository priceRepository;
-    
-    public List<Product> getAllProducts(){
-        return productRepository.findAll();
-    }
-    
-    public Optional<Product> getProductById(String id){
-        return productRepository.findById(id);
-    }
-    
-    public Optional<Product> getProductByName(String name){
-        return productRepository.findByName(name);
-    }
-    
-//    public List<Product> createProducts(List<Product> products) {
-//        List<Product> savedProduct = new ArrayList<>();
-//        for (Product product : products) {
-//            // Handle the Category before saving the product
-//            Category category = product.getCategory();
-//            if (category.getId() == null) {
-//                category = categoryRepository.save(category);
-//            }
-//            product.setCategory(category);
-//            
-//            // Handle the Inventory before saving the product
-//            List<Inventory> inventories = product.getInventories();
-//            for (int i = 0; i < inventories.size(); i++) {
-//                Inventory inventory = inventories.get(i);
-//                if (inventory.getId() == null) {
-//                    inventory = inventoryRepository.save(inventory);
-//                    inventories.set(i, inventory); // Update the list with saved inventory
-//                }
-//            }
-//            product.setInventories(inventories);
-//            
-//            // Handle the Price before saving the product
-//            Price price = product.getPrice();
-//            if (price.getId() == null) {
-//                price = priceRepository.save(price);
-//            }
-//            product.setPrice(price);
-//            
-//          
-//            savedProduct.add(createProduct(product));
-//            
-//            // Now that we have the product ID, update the inventories and price with it
-//            for (Inventory inventory : inventories) {
-//                inventory.setProductId(savedProduct.getId());
-//                inventoryRepository.save(inventory);
-//            }
-//
-//            if (price != null) {
-//                price.setProductId(savedProduct.getId());
-//                priceRepository.save(price);
-//            }
-//            
-//            
-//            
-//        }
-//        return savedProducts;
-//    }
+	private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-    
-    
-    public Product createProduct(Product product) {
-        // Handle the Category before saving the product
-        Category category = product.getCategory();
-        if (category.getId() == null) {
-            category = categoryRepository.save(category);
-        }
-        product.setCategory(category);
+	public List<Product> getAllProducts() {
+		return productRepository.findAll();
+	}
 
-        // Handle the Inventory before saving the product
-        List<Inventory> inventories = product.getInventories();
-        for (int i = 0; i < inventories.size(); i++) {
-            Inventory inventory = inventories.get(i);
-            if (inventory.getId() == null) {
-                inventory = inventoryRepository.save(inventory);
-                inventories.set(i, inventory); // Update the list with saved inventory
-            }
-        }
-        product.setInventories(inventories);
+	public Product getProductById(String id) {
+		return productRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("No product found with ID: " + id));
+	}
 
-        // Handle the Price before saving the product
-        Price price = product.getPrice();
-        if (price.getId() == null) {
-            price = priceRepository.save(price);
-        }
-        product.setPrice(price);
+	public List<Product> getProductsByName(String name) {
+		List<Product> products = productRepository.findByName(name);
+		if (products.isEmpty()) {
+			throw new RuntimeException("No product found with the name: " + name);
+		}
+		return products;
+	}
 
-        // Save the product to get the generated product ID
-        Product savedProduct = productRepository.save(product);
+	public Product createProduct(Product product) {
+		return productRepository.save(product);
+	}
 
-        // Now that we have the product ID, update the inventories and price with it
-        for (Inventory inventory : inventories) {
-            inventory.setProductId(savedProduct.getId());
-            inventoryRepository.save(inventory);
-        }
+	public Product updateProduct(String id, Product productDetails) {
+		return productRepository.findById(id).map(product -> {
+			product.setName(productDetails.getName());
+			product.setDescription(productDetails.getDescription());
+			product.setBrand(productDetails.getBrand());
+			product.setPrice(productDetails.getPrice());
+			product.setFinalPrice(productDetails.getFinalPrice());
+			product.setInventories(productDetails.getInventories());
+			product.setCategory(productDetails.getCategory());
 
-        if (price != null) {
-            price.setProductId(savedProduct.getId());
-            priceRepository.save(price);
-        }
+			return productRepository.save(product);
+		}).orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
+	}
 
-        // Return the final product with all references correctly set
-        return savedProduct;
-    }
+	public void deleteProduct(String id) {
+		if (!productRepository.existsById(id)) {
+			throw new ProductNotFoundException("Product not found with id: " + id);
+		}
+		productRepository.deleteById(id);
+	}
 
-    
-    public Product updateProduct(String id, Product productDetails) {
-        return productRepository.findById(id)
-                .map(product -> {
-                    // Handle the Category before updating the product
-                    Category category = productDetails.getCategory();
-                    if (category.getId() == null) {
-                        category = categoryRepository.save(category);
-                    }
-                    product.setCategory(category);
-                    
-                    // Handle the Inventory before updating the product
-                    List<Inventory> inventories = productDetails.getInventories();
-                    for (int i = 0; i < inventories.size(); i++) {
-                        Inventory inventory = inventories.get(i);
-                        if (inventory.getId() == null) {
-                            inventory = inventoryRepository.save(inventory);
-                            inventories.set(i, inventory);
-                        }
-                    }
-                    product.setInventories(inventories);
+	// Search products by category name
+	public List<Product> searchProductsByCategory(String categoryName) {
+		Query query = new Query(Criteria.where("category.name").is(categoryName));
+		logger.info("Executing Query: {}", query);
+		return mongoTemplate.find(query, Product.class);
+	}
 
-                    // Handle the Price before updating the product
-                    Price price = productDetails.getPrice();
-                    if (price.getId() == null) {
-                        price = priceRepository.save(price);
-                    }
-                    product.setPrice(price);
+	// Filter products by price range
+	public List<Product> filterProductsByPriceRange(double minPrice, double maxPrice) {
+		Query query = new Query(Criteria.where("price.finalPrice").gte(minPrice).lte(maxPrice));
+		logger.info("Executing Query: {}", query);
+		return mongoTemplate.find(query, Product.class);
+	}
 
-                    // Update other product details
-                    product.setName(productDetails.getName());
-                    product.setDescription(productDetails.getDescription());
-                    product.setBasePrice(productDetails.getBasePrice());
+	// Search products by brand name
+	public List<Product> searchProductsByBrand(String brand) {
+		Query query = new Query(Criteria.where("brand").is(brand));
+		logger.info("Executing Query: {}", query);
+		return mongoTemplate.find(query, Product.class);
+	}
 
-                    return productRepository.save(product);
-                }).orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
-    }
+	// Filter products by inventory quantity range
+	public List<Product> filterProductsByInventoryQuantity(int minQuantity, int maxQuantity) {
+		Query query = new Query(Criteria.where("inventories.quantity").gte(minQuantity).lte(maxQuantity));
+		logger.info("Executing Query: {}", query);
+		return mongoTemplate.find(query, Product.class);
+	}
 
-    public void deleteProduct(String id) {
-        if (!productRepository.existsById(id)) {
-            throw new ProductNotFoundException("Product not found with id: " + id);
-        }
-        productRepository.deleteById(id);
-    }
 }
-

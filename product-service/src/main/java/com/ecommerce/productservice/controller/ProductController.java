@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.productservice.model.Product;
@@ -30,10 +31,11 @@ public class ProductController {
 	}
 
 	@GetMapping("/{id}")
-	public Optional<Product> getProductById(@PathVariable String id){
+	public Product getProductById(@PathVariable String id){
 		return productService.getProductById(id);
 	}
 	
+
 	@PostMapping("/create")
 	public List<Product> createProducts(@RequestBody List<Product> products) {
 	    List<Product> savedProducts = new ArrayList<>();
@@ -42,18 +44,6 @@ public class ProductController {
 	    }
 	    return savedProducts;
 	}
-
-//	
-//	@PostMapping("/create")
-//	public Product createProduct(@RequestBody Product product) {
-//		System.out.println("create product is called");
-//		return productService.createProduct(product);
-//	}
-//	
-//	@PostMapping("/creates")
-//	public List<Product> createProducts(@RequestBody List<Product> products) {
-//	    return productService.createProducts(products);
-//	}
 
 	
 	@PutMapping("/{id}")

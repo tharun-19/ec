@@ -1,33 +1,9 @@
 package com.ecommerce.productservice.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document(collection = "prices")
 public class Price {
-
-	@Id
-	private String id;
-	private String productId;
 	private double basePrice;
 	private double discount;
 	private double finalPrice;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getProductId() {
-		return productId;
-	}
-
-	public void setProductId(String productId) {
-		this.productId = productId;
-	}
 
 	public double getBasePrice() {
 		return basePrice;

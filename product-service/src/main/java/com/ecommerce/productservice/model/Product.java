@@ -3,22 +3,20 @@ package com.ecommerce.productservice.model;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection="products")
+@Document(collection = "products")
 public class Product {
 	@Id
 	private String id;
 	private String name;
 	private String description;
 	private String brand;
-	private double basePrice;
-	@DBRef
+	private double finalPrice;
+
+	// Embedded objects
 	private Category category;
-	@DBRef
 	private List<Inventory> inventories;
-	@DBRef
 	private Price price;
 
 	public String getId() {
@@ -53,12 +51,12 @@ public class Product {
 		this.brand = brand;
 	}
 
-	public double getBasePrice() {
-		return basePrice;
+	public double getFinalPrice() {
+		return finalPrice;
 	}
 
-	public void setBasePrice(double basePrice) {
-		this.basePrice = basePrice;
+	public void setFinalPrice(double finalPrice) {
+		this.finalPrice = finalPrice;
 	}
 
 	public Category getCategory() {
@@ -84,6 +82,5 @@ public class Product {
 	public void setPrice(Price price) {
 		this.price = price;
 	}
-	
-	
+
 }
