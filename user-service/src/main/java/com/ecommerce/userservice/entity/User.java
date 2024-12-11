@@ -1,4 +1,4 @@
-package com.ecommerce.userservice.model;
+package com.ecommerce.userservice.entity;
 
 import java.util.Set;
 

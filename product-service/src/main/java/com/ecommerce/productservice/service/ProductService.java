@@ -1,7 +1,7 @@
 package com.ecommerce.productservice.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,89 +11,114 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.productservice.dto.ProductRequestDTO;
+import com.ecommerce.productservice.dto.ProductResponseDTO;
+import com.ecommerce.productservice.entity.Product;
 import com.ecommerce.productservice.exception.ProductNotFoundException;
-import com.ecommerce.productservice.model.Product;
 import com.ecommerce.productservice.repository.ProductRepository;
 
 @Service
 public class ProductService {
 
-	@Autowired
-	private ProductRepository productRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-	public List<Product> getAllProducts() {
-		return productRepository.findAll();
-	}
+   
+    public List<ProductResponseDTO> getAllProductDTOs() {
+        List<Product> products = productRepository.findAll();
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-	public Product getProductById(String id) {
-		return productRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("No product found with ID: " + id));
-	}
+    public ProductResponseDTO getProductResponseDTOById(String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("No product found with ID: " + id));
+        return toResponseDTO(product);
+    }
 
-	public List<Product> getProductsByName(String name) {
-		List<Product> products = productRepository.findByName(name);
-		if (products.isEmpty()) {
-			throw new RuntimeException("No product found with the name: " + name);
-		}
-		return products;
-	}
+    public ProductResponseDTO createProductFromDTO(ProductRequestDTO dto) {
+        Product product = toEntity(dto);
+        // If finalPrice is computed, do it here before saving
+        product.setFinalPrice(product.getBasePrice() - product.getDiscount());
+        Product saved = productRepository.save(product);
+        return toResponseDTO(saved);
+    }
 
-	public Product createProduct(Product product) {
-		return productRepository.save(product);
-	}
+    public void deleteProduct(String id) {
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException("Product not found with id: " + id);
+        }
+        productRepository.deleteById(id);
+    }
+    
+    
+    public List<ProductResponseDTO> getProductsByName(String name) {
+        List<Product> products = productRepository.findByName(name);
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No product found with the name: " + name);
+        }
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-	public Product updateProduct(String id, Product productDetails) {
-		return productRepository.findById(id).map(product -> {
-			product.setName(productDetails.getName());
-			product.setDescription(productDetails.getDescription());
-			product.setBrand(productDetails.getBrand());
-			product.setPrice(productDetails.getPrice());
-			product.setFinalPrice(productDetails.getFinalPrice());
-			product.setInventories(productDetails.getInventories());
-			product.setCategory(productDetails.getCategory());
+    public List<ProductResponseDTO> searchProductsByCategory(String categoryName) {
+        Query query = new Query(Criteria.where("categoryName").is(categoryName));
+        logger.info("Executing Query: {}", query);
+        List<Product> products = mongoTemplate.find(query, Product.class);
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-			return productRepository.save(product);
-		}).orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
-	}
+    public List<ProductResponseDTO> filterProductsByPriceRange(double minPrice, double maxPrice) {
+        Query query = new Query(Criteria.where("finalPrice").gte(minPrice).lte(maxPrice));
+        logger.info("Executing Query: {}", query);
+        List<Product> products = mongoTemplate.find(query, Product.class);
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-	public void deleteProduct(String id) {
-		if (!productRepository.existsById(id)) {
-			throw new ProductNotFoundException("Product not found with id: " + id);
-		}
-		productRepository.deleteById(id);
-	}
+    public List<ProductResponseDTO> searchProductsByBrand(String brand) {
+        Query query = new Query(Criteria.where("brand").is(brand));
+        logger.info("Executing Query: {}", query);
+        List<Product> products = mongoTemplate.find(query, Product.class);
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-	// Search products by category name
-	public List<Product> searchProductsByCategory(String categoryName) {
-		Query query = new Query(Criteria.where("category.name").is(categoryName));
-		logger.info("Executing Query: {}", query);
-		return mongoTemplate.find(query, Product.class);
-	}
+    public List<ProductResponseDTO> filterProductsByInventoryQuantity(int minQuantity, int maxQuantity) {
+        Query query = new Query(Criteria.where("inventories.quantity").gte(minQuantity).lte(maxQuantity));
+        logger.info("Executing Query: {}", query);
+        List<Product> products = mongoTemplate.find(query, Product.class);
+        return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
 
-	// Filter products by price range
-	public List<Product> filterProductsByPriceRange(double minPrice, double maxPrice) {
-		Query query = new Query(Criteria.where("price.finalPrice").gte(minPrice).lte(maxPrice));
-		logger.info("Executing Query: {}", query);
-		return mongoTemplate.find(query, Product.class);
-	}
+    // Private mapper methods (same as given before):
+    private Product toEntity(ProductRequestDTO dto) {
+        Product product = new Product();
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setBrand(dto.getBrand());
+        product.setBasePrice(dto.getBasePrice());
+        product.setDiscount(dto.getDiscount());
+        product.setCategoryName(dto.getCategoryName());
+        product.setCategoryDescription(dto.getCategoryDescription());
+        product.setStockQuantity(dto.getStockQuantity());
+        return product;
+    }
 
-	// Search products by brand name
-	public List<Product> searchProductsByBrand(String brand) {
-		Query query = new Query(Criteria.where("brand").is(brand));
-		logger.info("Executing Query: {}", query);
-		return mongoTemplate.find(query, Product.class);
-	}
-
-	// Filter products by inventory quantity range
-	public List<Product> filterProductsByInventoryQuantity(int minQuantity, int maxQuantity) {
-		Query query = new Query(Criteria.where("inventories.quantity").gte(minQuantity).lte(maxQuantity));
-		logger.info("Executing Query: {}", query);
-		return mongoTemplate.find(query, Product.class);
-	}
+    private ProductResponseDTO toResponseDTO(Product product) {
+        ProductResponseDTO responseDTO = new ProductResponseDTO();
+        responseDTO.setId(product.getId());
+        responseDTO.setName(product.getName());
+        responseDTO.setDescription(product.getDescription());
+        responseDTO.setBrand(product.getBrand());
+        responseDTO.setBasePrice(product.getBasePrice());
+        responseDTO.setDiscount(product.getDiscount());
+        responseDTO.setFinalPrice(product.getFinalPrice());
+        responseDTO.setCategoryName(product.getCategoryName());
+        responseDTO.setCategoryDescription(product.getCategoryDescription());
+        responseDTO.setStockQuantity(product.getStockQuantity());
+        return responseDTO;
+    }
 
 }

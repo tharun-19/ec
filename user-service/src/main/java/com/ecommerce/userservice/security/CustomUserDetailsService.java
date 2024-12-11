@@ -1,6 +1,6 @@
 //This service loads user data from the database by username, 
 //which is essential for the authentication process in Spring Security
-package com.ecommerce.userservice.service;
+package com.ecommerce.userservice.security;
 
 import java.util.Optional;
 
@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.ecommerce.userservice.model.User;
+import com.ecommerce.userservice.entity.User;
 import com.ecommerce.userservice.repository.UserRepository;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

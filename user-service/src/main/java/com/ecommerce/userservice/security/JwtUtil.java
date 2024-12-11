@@ -1,7 +1,7 @@
 //This utility class is responsible for managing JWT tokens, including 
 //their creation, validation, and information extraction.
 
-package com.ecommerce.userservice.service;
+package com.ecommerce.userservice.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

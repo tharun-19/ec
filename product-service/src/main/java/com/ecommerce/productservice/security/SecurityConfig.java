@@ -1,15 +1,9 @@
-//Using hasRole vs. hasAuthority:
-//hasRole("ADMIN"): When you use hasRole("ADMIN"), Spring Security automatically adds a ROLE_ prefix, 
-//so it looks for ROLE_ADMIN in the authorities list.
-//hasAuthority("ADMIN"): When you use hasAuthority("ADMIN"), Spring Security looks for the exact authority 
-//without adding any prefix.
-
-
-package com.ecommerce.userservice.config;
+package com.ecommerce.productservice.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -21,21 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ecommerce.userservice.filter.JwtRequestFilter;
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-	@Autowired
-    private final JwtRequestFilter jwtRequestFilter;
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -47,16 +34,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .authorizeRequests(requests -> requests
-                        .requestMatchers("/", "/user-service/auth/authenticate", "/user-service/auth/register").permitAll()
-                        .requestMatchers("/user-service/admin/**").hasAuthority("ADMIN") 
-                        .anyRequest().authenticated())
-                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.csrf().disable()
+            .authorizeHttpRequests()
+            .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
+            .anyRequest().authenticated()
+            .and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//            .csrf(csrf -> csrf.disable())
+//            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())  // Temporarily allow all requests
+//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+
+
+
 
 }

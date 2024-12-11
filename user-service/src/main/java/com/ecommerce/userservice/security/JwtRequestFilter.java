@@ -1,4 +1,4 @@
-package com.ecommerce.userservice.filter;
+package com.ecommerce.userservice.security;
 
 import java.io.IOException;
 
@@ -9,9 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.ecommerce.userservice.service.CustomUserDetailsService;
-import com.ecommerce.userservice.service.JwtUtil;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 

@@ -1,7 +1,7 @@
 package com.ecommerce.userservice.controller;
 
-import com.ecommerce.userservice.model.Role;
-import com.ecommerce.userservice.model.User;
+import com.ecommerce.userservice.entity.Role;
+import com.ecommerce.userservice.entity.User;
 import com.ecommerce.userservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

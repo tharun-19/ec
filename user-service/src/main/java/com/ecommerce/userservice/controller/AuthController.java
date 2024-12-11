@@ -1,12 +1,12 @@
 package com.ecommerce.userservice.controller;
 
-import com.ecommerce.userservice.model.Role;
-import com.ecommerce.userservice.model.User;
-import com.ecommerce.userservice.service.CustomUserDetailsService;
-import com.ecommerce.userservice.service.JwtUtil;
 import com.ecommerce.userservice.dto.AuthenticationRequest;
 import com.ecommerce.userservice.dto.AuthenticationResponse;
+import com.ecommerce.userservice.entity.Role;
+import com.ecommerce.userservice.entity.User;
 import com.ecommerce.userservice.repository.UserRepository;
+import com.ecommerce.userservice.security.CustomUserDetailsService;
+import com.ecommerce.userservice.security.JwtUtil;
 
 import java.util.Set;
 

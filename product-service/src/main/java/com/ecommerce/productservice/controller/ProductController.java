@@ -2,59 +2,42 @@ package com.ecommerce.productservice.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.ecommerce.productservice.model.Product;
+import com.ecommerce.productservice.dto.ProductRequestDTO;
+import com.ecommerce.productservice.dto.ProductResponseDTO;
 import com.ecommerce.productservice.service.ProductService;
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-	
-	@Autowired
-	private ProductService productService;
-	
-	@GetMapping
-	public List<Product> getAllProducts(){
-		return productService.getAllProducts();
-	}
 
-	@GetMapping("/{id}")
-	public Product getProductById(@PathVariable String id){
-		return productService.getProductById(id);
-	}
-	
+    @Autowired
+    private ProductService productService;
 
-	@PostMapping("/create")
-	public List<Product> createProducts(@RequestBody List<Product> products) {
-	    List<Product> savedProducts = new ArrayList<>();
-	    for (Product product : products) {
-	        savedProducts.add(productService.createProduct(product));
-	    }
-	    return savedProducts;
-	}
+    @GetMapping
+    public List<ProductResponseDTO> getAllProducts() {
+        return productService.getAllProductDTOs();
+    }
 
-	
-	@PutMapping("/{id}")
-	public Product updateProduct(@PathVariable String id, @RequestBody Product product) {
-		return productService.updateProduct(id, product);
-	}
-	
-	@DeleteMapping("/{id}")
-	public void deleteProduct(@PathVariable String id) {
-		System.out.println("product delete is called "+id);
-		productService.deleteProduct(id); 
-	}
+    @GetMapping("/{id}")
+    public ProductResponseDTO getProductById(@PathVariable String id) {
+        return productService.getProductResponseDTOById(id);
+    }
+
+    @PostMapping("/create")
+    public List<ProductResponseDTO> createProducts(@RequestBody List<ProductRequestDTO> productRequestDTOs) {
+        List<ProductResponseDTO> createdProducts = new ArrayList<>();
+        for (ProductRequestDTO dto : productRequestDTOs) {
+            createdProducts.add(productService.createProductFromDTO(dto));
+        }
+        return createdProducts;
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProduct(@PathVariable String id) {
+        productService.deleteProduct(id);
+    }
 }
-
