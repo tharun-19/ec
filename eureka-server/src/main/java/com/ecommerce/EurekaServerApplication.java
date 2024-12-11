@@ -12,7 +12,7 @@ public class EurekaServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EurekaServerApplication.class, args);
-		System.out.println("Eureka has Server started");
+		System.out.println("Eureka Server started_____");
 	}
 
 }
