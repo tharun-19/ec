@@ -42,7 +42,7 @@ public class ProductService {
 
     public ProductResponseDTO createProductFromDTO(ProductRequestDTO dto) {
         Product product = toEntity(dto);
-        // If finalPrice is computed, do it here before saving
+        // finalPrice is computed here
         product.setFinalPrice(product.getBasePrice() - product.getDiscount());
         Product saved = productRepository.save(product);
         return toResponseDTO(saved);
@@ -86,13 +86,13 @@ public class ProductService {
     }
 
     public List<ProductResponseDTO> filterProductsByInventoryQuantity(int minQuantity, int maxQuantity) {
-        Query query = new Query(Criteria.where("inventories.quantity").gte(minQuantity).lte(maxQuantity));
+        Query query = new Query(Criteria.where("stockQuantity").gte(minQuantity).lte(maxQuantity));
         logger.info("Executing Query: {}", query);
         List<Product> products = mongoTemplate.find(query, Product.class);
         return products.stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
-    // Private mapper methods (same as given before):
+    // mapper methods 
     private Product toEntity(ProductRequestDTO dto) {
         Product product = new Product();
         product.setName(dto.getName());
